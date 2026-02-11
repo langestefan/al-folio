@@ -30,6 +30,7 @@ let applyTheme = () => {
   setGiscusTheme(theme);
   setSearchTheme(theme);
   setCookieConsentTheme(theme);
+  setMarimoTheme(theme);
   updateCalendarUrl();
 
   // if mermaid is not defined, do nothing
@@ -111,6 +112,16 @@ let setGiscusTheme = (theme) => {
     setConfig: {
       theme: theme,
     },
+  });
+};
+
+let setMarimoTheme = (theme) => {
+  // marimo.app WASM iframes are cross-origin and default to light theme.
+  // There is no URL param or API to control their theme externally.
+  // Use CSS filter inversion as a workaround for dark mode.
+  const isDark = theme === "dark";
+  document.querySelectorAll(".marimo-notebook iframe, .marimo-notebook-inline iframe").forEach((iframe) => {
+    iframe.style.filter = isDark ? "invert(0.75) hue-rotate(180deg) contrast(1.5) brightness(1.2)" : "none";
   });
 };
 

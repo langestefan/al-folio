@@ -55,3 +55,19 @@ marimo-iframe {
     border-radius: 0;
   }
 }
+
+// Dark/light mode for marimo iframes.
+// marimo.app WASM iframes are cross-origin and default to light theme.
+// There is no URL query param or postMessage API to control their theme.
+// We use CSS filter inversion as a practical workaround:
+//   invert(0.75) maps white (#fff) -> ~#404040 for a softer dark background,
+//   and black text -> ~#bfbfbf for readable contrast.
+//   hue-rotate(180deg) partially corrects the colour shift.
+//   contrast(1.5) + brightness(1.2) widens the gap between cell outlines
+//   and the background, making borders clearly visible.
+html[data-theme="dark"] {
+  .marimo-notebook iframe,
+  .marimo-notebook-inline iframe {
+    filter: invert(0.75) hue-rotate(180deg) contrast(1.5) brightness(1.2);
+  }
+}
