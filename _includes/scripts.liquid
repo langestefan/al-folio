@@ -378,10 +378,64 @@
 {% endif %}
 
 {% if page.marimo %}
-  <!-- Marimo Snippets: parse fenced code blocks and auto-calculate height -->
+  <!-- Marimo Snippets: convert code blocks to interactive notebooks -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // 1. Parse fenced code blocks (```lang ... ```) into <pre><code> elements
+      // 1. Convert .marimo-notebook-inline divs into <marimo-iframe> elements.
+      //    kramdown (with markdown="1") has already converted fenced code blocks
+      //    to <pre><code> elements which survive HTML minification.
+      document.querySelectorAll('.marimo-notebook-inline').forEach(function (div) {
+        var frame = document.createElement('marimo-iframe');
+        // Copy data attributes (e.g. data-height) to the marimo-iframe
+        Array.prototype.forEach.call(div.attributes, function (attr) {
+          if (attr.name.startsWith('data-')) {
+            frame.setAttribute(attr.name, attr.value);
+          }
+        });
+        // Move <pre> elements into the marimo-iframe, copying the language
+        // class from the kramdown wrapper so marimo-snippets can still
+        // distinguish Python cells from markdown cells.
+        // We avoid moving the whole .highlighter-rouge wrapper because its
+        // nested divs create text-node whitespace that marimo-snippets reads
+        // as blank first/last lines via .textContent.
+        var wrappers = Array.from(div.querySelectorAll('.highlighter-rouge'));
+        if (wrappers.length > 0) {
+          wrappers.forEach(function (wrapper) {
+            // Extract language class (e.g. "language-python") from the wrapper
+            var langClass = '';
+            wrapper.classList.forEach(function (cls) {
+              if (cls.startsWith('language-')) langClass = cls;
+            });
+            var pre = wrapper.querySelector('pre');
+            if (pre) {
+              // Copy language class onto the <pre> so marimo-snippets detects it
+              if (langClass) pre.classList.add(langClass);
+              // Trim leading/trailing whitespace from <code> content
+              pre.querySelectorAll('code').forEach(function (c) {
+                c.textContent = c.textContent.replace(/^\n+/, '').replace(/\s+$/, '');
+              });
+              frame.appendChild(pre);
+            }
+          });
+        } else {
+          // Fallback: move <pre> elements directly
+          var pres = Array.from(div.querySelectorAll('pre'));
+          pres.forEach(function (pre) {
+            pre.querySelectorAll('code').forEach(function (c) {
+              c.textContent = c.textContent.replace(/^\n+/, '').replace(/\s+$/, '');
+            });
+            frame.appendChild(pre);
+          });
+        }
+        // Clear the div and insert the marimo-iframe
+        div.innerHTML = '';
+        div.appendChild(frame);
+        div.style.visibility = 'visible';
+      });
+
+      // 2. Fallback: parse fenced code blocks from raw text for <marimo-iframe>
+      //    elements that don't already contain <pre> children (e.g. local dev
+      //    without minification).
       document.querySelectorAll('marimo-iframe').forEach(function (frame) {
         if (frame.querySelector('pre')) return;
         var text = frame.textContent;
@@ -404,7 +458,8 @@
         }
         frame.style.visibility = 'visible';
       });
-      // 2. Auto-calculate iframe height when data-height is not set
+
+      // 3. Auto-calculate iframe height when data-height is not set
       document.querySelectorAll('marimo-iframe').forEach(function (frame) {
         if (frame.hasAttribute('data-height')) return;
         var cells = frame.querySelectorAll('pre');

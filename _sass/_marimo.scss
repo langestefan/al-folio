@@ -42,3 +42,16 @@ marimo-iframe {
     width: 100%;
   }
 }
+
+// Wrapper class for marimo inline notebooks (using markdown="1" for kramdown processing)
+.marimo-notebook-inline {
+  // Hide until JS converts <pre> elements into <marimo-iframe>
+  visibility: hidden;
+
+  // Style the marimo-iframe created by JS inside this wrapper
+  marimo-iframe {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+}
