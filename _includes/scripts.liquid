@@ -376,3 +376,46 @@
 {% if site.newsletter.enabled %}
   <script defer src="{{ '/assets/js/newsletter.js' | relative_url | bust_file_cache }}"></script>
 {% endif %}
+
+{% if page.marimo %}
+  <!-- Marimo Snippets: parse fenced code blocks and auto-calculate height -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 1. Parse fenced code blocks (```lang ... ```) into <pre><code> elements
+      document.querySelectorAll('marimo-iframe').forEach(function (frame) {
+        if (frame.querySelector('pre')) return;
+        var text = frame.textContent;
+        var blocks = [];
+        var regex = /```(\w*)\n([\s\S]*?)```/g;
+        var match;
+        while ((match = regex.exec(text)) !== null) {
+          blocks.push({ lang: match[1] || 'python', code: match[2].replace(/\n$/, '') });
+        }
+        if (blocks.length > 0) {
+          frame.innerHTML = '';
+          blocks.forEach(function (b) {
+            var pre = document.createElement('pre');
+            var code = document.createElement('code');
+            code.className = 'language-' + b.lang;
+            code.textContent = b.code + '\n';
+            pre.appendChild(code);
+            frame.appendChild(pre);
+          });
+        }
+        frame.style.visibility = 'visible';
+      });
+      // 2. Auto-calculate iframe height when data-height is not set
+      document.querySelectorAll('marimo-iframe').forEach(function (frame) {
+        if (frame.hasAttribute('data-height')) return;
+        var cells = frame.querySelectorAll('pre');
+        var totalLines = 0;
+        cells.forEach(function (cell) {
+          totalLines += (cell.textContent || '').split('\n').filter(Boolean).length;
+        });
+        var height = Math.max(300, 150 + cells.length * 80 + totalLines * 22);
+        frame.setAttribute('data-height', height + 'px');
+      });
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@marimo-team/marimo-snippets@1"></script>
+{% endif %}

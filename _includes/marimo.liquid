@@ -1,0 +1,73 @@
+{% comment %}
+  Marimo notebook embedding component.
+
+  Supports two modes:
+  1. Iframe mode — embed a hosted marimo notebook (from marimo.app or self-hosted WASM).
+     Parameters:
+       - src (required): URL of the marimo notebook (e.g., "https://marimo.app/l/abc123")
+       - height: iframe height (default: "600px")
+       - width: iframe width (default: "100%")
+       - mode: "read" or "edit" (default: "read")
+       - embed: whether to pass embed=true to the URL (default: true)
+       - caption: optional caption below the notebook
+       - class: additional CSS classes
+
+  2. Inline snippet mode — write Python code directly that runs in-browser via WASM.
+     Parameters:
+       - snippet: set to true to enable snippet mode
+       - height: iframe height (default: "400px")
+       - show_code: whether to show code (default: true)
+       - caption: optional caption below the notebook
+
+  Usage examples:
+    {% include marimo.liquid src="https://marimo.app/l/abc123" %}
+    {% include marimo.liquid src="https://marimo.app/l/abc123" height="800px" mode="edit" %}
+{% endcomment %}
+
+{% if include.src %}
+  {% comment %} Iframe embed mode {% endcomment %}
+  {% assign marimo_height = include.height | default: '600px' %}
+  {% assign marimo_width = include.width | default: '100%' %}
+  {% assign marimo_mode = include.mode | default: 'read' %}
+  {% assign marimo_embed = include.embed | default: true %}
+
+  {% comment %} Build the URL with query params {% endcomment %}
+  {% if include.src contains '?' %}
+    {% assign marimo_separator = '&' %}
+  {% else %}
+    {% assign marimo_separator = '?' %}
+  {% endif %}
+
+  {% assign marimo_url = include.src %}
+  {% if marimo_embed %}
+    {% assign marimo_url = marimo_url | append: marimo_separator | append: 'embed=true' %}
+    {% assign marimo_separator = '&' %}
+  {% endif %}
+  {% assign marimo_url = marimo_url | append: marimo_separator | append: 'mode=' | append: marimo_mode %}
+
+  <figure class="marimo-notebook">
+    <div class="marimo-embed-container">
+      <iframe
+        src="{{ marimo_url }}"
+        {% if include.class %}
+          class="{{ include.class }}"
+        {% endif %}
+        sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"
+        allow="microphone"
+        allowfullscreen
+        width="{{ marimo_width }}"
+        height="{{ marimo_height }}"
+        frameborder="0"
+        loading="lazy"
+        {% if include.title %}
+          title="{{ include.title }}"
+        {% else %}
+          title="Marimo notebook"
+        {% endif %}
+      ></iframe>
+    </div>
+    {% if include.caption %}
+      <figcaption class="caption">{{ include.caption }}</figcaption>
+    {% endif %}
+  </figure>
+{% endif %}

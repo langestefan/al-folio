@@ -1,0 +1,44 @@
+/*******************************************************************************
+ * Marimo notebook styles
+ ******************************************************************************/
+
+@use "variables";
+
+.marimo-notebook {
+  margin: 1.5rem 0;
+
+  .marimo-embed-container {
+    position: relative;
+    width: 100%;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: var(--global-bg-color);
+
+    iframe {
+      display: block;
+      border: none;
+      width: 100%;
+    }
+  }
+
+  .caption {
+    margin-top: 0.5rem;
+  }
+}
+
+// Marimo snippet styling (for inline <marimo-iframe> elements)
+marimo-iframe {
+  display: block;
+  margin: 1.5rem 0;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  // Hide raw content (fenced code blocks as text) until JS processes them
+  visibility: hidden;
+
+  iframe {
+    border: none;
+    width: 100%;
+  }
+}
