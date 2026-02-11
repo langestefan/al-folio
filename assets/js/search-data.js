@@ -72,7 +72,18 @@ ninja.data = [{
               handler: () => {
                 window.location.href = "/al-folio/blog/";
               },
-            },{id: "post-a-post-with-plotly-js",
+            },{id: "post-a-post-with-marimo-notebooks",
+        
+          title: "a post with marimo notebooks",
+        
+        description: "embedding interactive marimo notebooks in your blog posts",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/al-folio/blog/2026/marimo/";
+          
+        },
+      },{id: "post-a-post-with-plotly-js",
         
           title: "a post with plotly.js",
         
